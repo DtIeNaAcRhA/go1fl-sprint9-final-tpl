@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"math/rand"
-	"slices"
 	"sync"
 	"time"
 )
@@ -66,19 +65,24 @@ func generateRandomElements(size int) []int {
 // maximum returns the maximum number of elements.
 func maximum(data []int) int {
 	if data == nil || len(data) == 0 {
-		return -1
+		return 0
 	}
-	maxValue := slices.Max(data)
+	maxValue := data[0]
+	for _, v := range data {
+		if v > maxValue {
+			maxValue = v
+		}
+	}
 	return maxValue
 }
 
 // maxChunks returns the maximum number of elements in a chunks.
 func maxChunks(data []int) int {
 	if data == nil || len(data) == 0 {
-		return -1
+		return 0
 	}
 	if len(data) < CHUNKS+CHUNKS/2 { //нет смысла в горрустинах
-		return slices.Max(data)
+		return maximum(data)
 	}
 	wg := sync.WaitGroup{}
 
@@ -98,15 +102,15 @@ func maxChunks(data []int) int {
 		wg.Add(1)
 		go func(inx int, partData []int) {
 			defer wg.Done()
-			maxsfromData[inx] = slices.Max(partData)
+			maxsfromData[inx] = maximum(partData)
 		}(i, data[start:end])
 	}
 	wg.Wait()
-	return slices.Max(maxsfromData)
+	return maximum(maxsfromData)
 }
 
 func main() {
-	fmt.Printf("Генерируем %d целых чисел", SIZE)
+	fmt.Printf("Генерируем %d целых чисел\n", SIZE)
 	array := generateRandomElements(SIZE)
 
 	fmt.Println("Ищем максимальное значение в один поток")
